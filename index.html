@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Upload Form</title>
+  </head>
+  <body>
+    <label for="file">Choose a file:</label>
+    <input type="file" id="file" name="file" required />
+    <br />
+    <button onclick="uploadFile()">Upload</button>
+
+    <br /><br />
+
+    <label for="file">Public Key:</label>
+    <input type="text" id="publicKey" name="publicKey" required />
+    <br />
+    <button onclick="downloadFile()">DOWNLOAD</button>
+
+    <br /><br />
+
+    <label for="file">Private Key:</label>
+    <input type="text" id="privateKey" name="privateKey" required />
+    <br />
+    <button onclick="deleteFile()">DELETE</button>
+  </body>
+
+  <script>
+    async function uploadFile() {
+      let formData = new FormData();
+      formData.append("file", file.files[0]);
+      let response = await fetch("/files/", {
+        method: "POST",
+        body: formData,
+      })
+        .then(function (response) {
+          return response.text();
+        })
+        .then(function (data) {
+          return JSON.parse(data);
+        });
+      // document.getElementById("private-key").textContent = response.privateKey;
+      // document.getElementById("public-key").textContent = response.publicKey;
+    }
+
+    async function downloadFile() {
+      // Create a link element
+      var link = document.createElement("a");
+      link.href = `http://localhost:{{PORT}}/files/${
+        document.getElementById("publicKey").value
+      }`;
+      link.target = "_blank";
+
+      // Append the link to the document
+      document.body.appendChild(link);
+      // Trigger a click event on the link
+      link.click();
+      // Remove the link from the document
+      document.body.removeChild(link);
+    }
+
+    async function deleteFile() {
+      let response = await fetch(
+        `/files/${document.getElementById("privateKey").value}`,
+        {
+          method: "DELETE",
+        }
+      )
+        .then(function (response) {
+          return response.text();
+        })
+        .then(function (data) {
+          return JSON.parse(data);
+        });
+
+      alert(response.message);
+    }
+  </script>
+</html>
