@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
+const uploadFolderPath = process.env.FOLDER || "./uploads/";
 
 const dbPath = path.join("./", "db.json");
 
@@ -29,10 +30,14 @@ function uploadFile(file) {
   // Write back to the database file
   writeFileDatabase(database);
 
+  // Create upload directory if not created yet
+  if (!fs.existsSync(uploadFolderPath)) {
+    fs.mkdirSync(uploadFolderPath);
+  }
+
   // Move the file to the storage folder
   const storagePath = path.join(
-    "./",
-    process.env.FOLDER,
+    uploadFolderPath,
     timestamp + "-" + file.originalname
   );
   fs.writeFileSync(storagePath, file.buffer);
@@ -48,15 +53,21 @@ function getFile(publicKey) {
     return null; // File not found
   }
 
-  const filePath = path.join("./", process.env.FOLDER, file.originalName);
+  const filePath = path.join(uploadFolderPath, file.originalName);
   return { filePath, originalName: file.originalName };
 }
 
-function deleteFile(privateKey) {
+function deleteFile(privateKey, originalName = "") {
   const database = readFileDatabase();
-  const fileIndex = database.files.findIndex(
-    (f) => f.privateKey === privateKey
-  );
+  let fileIndex = -1;
+
+  if (originalName) {
+    fileIndex = database.files.findIndex(
+      (f) => f.originalName === originalName
+    );
+  } else {
+    fileIndex = database.files.findIndex((f) => f.privateKey === privateKey);
+  }
 
   if (fileIndex === -1) {
     return false; // File not found
@@ -69,11 +80,7 @@ function deleteFile(privateKey) {
   writeFileDatabase(database);
 
   // Remove the file from the storage folder
-  const filePath = path.join(
-    "./",
-    process.env.FOLDER,
-    deletedFile.originalName
-  );
+  const filePath = path.join(process.env.FOLDER, deletedFile.originalName);
   fs.unlinkSync(filePath);
 
   return true;

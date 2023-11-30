@@ -11,7 +11,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 const fileRoutes = require("./src/routes/fileRoutes");
+const cleanupJob = require("./src/middlewares/cleanupJob");
 app.use("/files", fileRoutes);
+
+cleanupJob();
 
 app.get("/", function (req, res) {
   // res.sendFile(path.join(__dirname, "./", "index.html"));
@@ -33,6 +36,8 @@ app.get("/", function (req, res) {
 
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+module.exports = server;
