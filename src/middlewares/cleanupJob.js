@@ -1,12 +1,23 @@
 const fs = require("fs");
 const path = require("path");
 const fileHandler = require("../components/fileHandler");
+const cron = require("node-cron");
 
 const cleanupJob = () => {
-  const inactivityPeriod =
-    (process.env.CLEANUP_DAYS || 7) * 24 * 60 * 60 * 1000;
+  // Check if npm script is 'test'
+  const isTestScript = process.env.npm_lifecycle_event === "test";
 
-  setInterval(() => {
+  // If it's the 'test' script, don't schedule the cron job
+  if (isTestScript) {
+    console.log("Cron job skipped during testing.");
+    return;
+  }
+
+  const inactivityPeriod =
+    (process.env.INACTIVE_CLEANUP_DAYS || 7) * 24 * 60 * 60 * 1000;
+
+  // Schedule the cleanup job to run every hour;
+  cron.schedule("0 * * * *", () => {
     const folderPath = process.env.FOLDER || "./uploads";
     const files = fs.readdirSync(folderPath);
 
@@ -24,7 +35,7 @@ const cleanupJob = () => {
         console.log(`File ${file} deleted due to inactivity.`);
       }
     });
-  }, inactivityPeriod);
+  });
 };
 
 module.exports = cleanupJob;

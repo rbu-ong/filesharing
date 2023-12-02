@@ -10,18 +10,21 @@
     <input type="file" id="file" name="file" required />
     <br />
     <button onclick="uploadFile()">Upload</button>
+    <br />
+    <p>Private Key: <span id="privateKey"></span></p>
+    <p>Public Key: <span id="publicKey"></span></p>
 
     <br /><br />
 
     <label for="file">Public Key:</label>
-    <input type="text" id="publicKey" name="publicKey" required />
+    <input type="text" id="inputPublicKey" name="publicKey" required />
     <br />
     <button onclick="downloadFile()">DOWNLOAD</button>
 
     <br /><br />
 
     <label for="file">Private Key:</label>
-    <input type="text" id="privateKey" name="privateKey" required />
+    <input type="text" id="inputPrivateKey" name="privateKey" required />
     <br />
     <button onclick="deleteFile()">DELETE</button>
   </body>
@@ -40,15 +43,18 @@
         .then(function (data) {
           return JSON.parse(data);
         });
-      // document.getElementById("private-key").textContent = response.privateKey;
-      // document.getElementById("public-key").textContent = response.publicKey;
+
+      console.log(response);
+
+      document.getElementById("privateKey").textContent = response.privateKey;
+      document.getElementById("publicKey").textContent = response.publicKey;
     }
 
     async function downloadFile() {
       // Create a link element
       var link = document.createElement("a");
       link.href = `http://localhost:{{PORT}}/files/${
-        document.getElementById("publicKey").value
+        document.getElementById("inputPublicKey").value
       }`;
       link.target = "_blank";
 
@@ -62,7 +68,7 @@
 
     async function deleteFile() {
       let response = await fetch(
-        `/files/${document.getElementById("privateKey").value}`,
+        `/files/${document.getElementById("inputPrivateKey").value}`,
         {
           method: "DELETE",
         }
@@ -74,7 +80,11 @@
           return JSON.parse(data);
         });
 
-      alert(response.message);
+      if (response.message) {
+        alert(response.message);
+      } else {
+        alert(response.error);
+      }
     }
   </script>
 </html>

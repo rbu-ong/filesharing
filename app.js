@@ -14,11 +14,10 @@ const fileRoutes = require("./src/routes/fileRoutes");
 const cleanupJob = require("./src/middlewares/cleanupJob");
 app.use("/files", fileRoutes);
 
-cleanupJob();
+// Start cleanup job
+cleanupJob;
 
 app.get("/", function (req, res) {
-  // res.sendFile(path.join(__dirname, "./", "index.html"));
-
   // Read the HTML file
   const htmlFilePath = "index.html";
   fs.readFile(htmlFilePath, "utf8", (err, data) => {
@@ -31,6 +30,23 @@ app.get("/", function (req, res) {
 
     // Send the modified HTML file
     res.send(modifiedHTML);
+  });
+});
+
+// Handle process termination to stop cleanup job and close server
+process.on("SIGTERM", () => {
+  cleanupJob.stopCleanupJob();
+  server.close(() => {
+    console.log("Server closed");
+    process.exit(0);
+  });
+});
+
+process.on("SIGINT", () => {
+  cleanupJob.stopCleanupJob();
+  server.close(() => {
+    console.log("Server closed");
+    process.exit(0);
   });
 });
 
