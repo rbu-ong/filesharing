@@ -30,11 +30,17 @@ npm start
 
 This will start the API server using the configuration provided in the .env file.
 
+Open browser and type http://localhost:3000/ or click link below\
+[Filesharing](http://localhost:3000/)
+
 ### Running Tests
 
 ```bash
 npm test
 ```
+
+Should return \
+![alt](test-ui.jpg)
 
 This will run both unit and integration tests.
 
